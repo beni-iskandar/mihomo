@@ -1,0 +1,220 @@
+redir-port: 7892
+port: 7890
+socks-port: 7891
+mixed-port: 7893
+mode: rule
+log-level: silent
+allow-lan: true
+unified-delay: true
+external-controller: 0.0.0.0:9090
+secret: reyre
+bind-address: 0.0.0.0
+external-ui: ui
+tproxy-port: 7895
+tcp-concurrent: true	
+enable-process: true
+find-process-mode: always
+ipv6: true
+
+experimental:
+  ignore-resolve-fail: true
+  sniff-tls-sni: true
+  tracing: true
+hosts:
+  "localhost": 127.0.0.1
+profile:
+  store-selected: true
+  store-fake-ip: true
+
+tun:
+  enable: true
+  stack: system
+  device: utun
+  dns-hijack:
+  - tcp://any:53
+  gso: true
+  gso-max-size: 65536
+  auto-route: false
+  auto-detect-interface: false
+  auto-redirect: false
+  strict-route: false
+dns:
+  enable: true
+  ipv6: true
+  default-nameserver:
+    - '9.9.9.9'
+    - '149.112.112.112'
+  enhanced-mode: fake-ip
+  fake-ip-range: 198.18.0.1/16
+  fake-ip-filter:
+    - 'stun.*.*'
+    - 'stun.*.*.*'
+    - '+.stun.*.*'
+    - '+.stun.*.*.*'
+    - '+.stun.*.*.*.*'
+    - '+.stun.*.*.*.*.*'
+    - '*.lan'
+    - '+.msftncsi.com'
+    - msftconnecttest.com
+    - 'time?.*.com'
+    - 'time.*.com'
+    - 'time.*.gov'
+    - 'time.*.apple.com'
+    - time-ios.apple.com
+    - 'time1.*.com'
+    - 'time2.*.com'
+    - 'time3.*.com'
+    - 'time4.*.com'
+    - 'time5.*.com'
+    - 'time6.*.com'
+    - 'time7.*.com'
+    - 'ntp?.*.com'
+    - 'ntp.*.com'
+    - 'ntp1.*.com'
+    - 'ntp2.*.com'
+    - 'ntp3.*.com'
+    - 'ntp4.*.com'
+    - 'ntp5.*.com'
+    - 'ntp6.*.com'
+    - 'ntp7.*.com'
+    - '+.pool.ntp.org'
+    - '+.ipv6.microsoft.com'
+    - speedtest.cros.wr.pvp.net
+    - network-test.debian.org
+    - detectportal.firefox.com
+    - cable.auth.com
+    - miwifi.com
+    - routerlogin.com
+    - routerlogin.net
+    - tendawifi.com
+    - tendawifi.net
+    - tplinklogin.net
+    - tplinkwifi.net
+    - '*.xiami.com'
+    - tplinkrepeater.net
+    - router.asus.com
+    - '*.*.*.srv.nintendo.net'
+    - '*.*.stun.playstation.net'
+    - '*.openwrt.pool.ntp.org'
+    - resolver1.opendns.com
+    - 'GC._msDCS.*.*'
+    - 'DC._msDCS.*.*'
+    - 'PDC._msDCS.*.*'
+  use-hosts: true
+
+  nameserver:
+    - "https://dns.quad9.net/dns-query"
+
+proxy-providers:
+  Vmess:
+    type: file
+    path: "./proxy_provider/vmess.yaml"
+    health-check:
+      enable: true
+      url: http://www.gstatic.com/generate_204
+      interval: 30
+  Vless:
+    type: file
+    path: "./proxy_provider/vless.yaml"
+    health-check:
+      enable: true
+      url: http://www.gstatic.com/generate_204
+      interval: 30
+  Trojan:
+    type: file
+    path: "./proxy_provider/trojan.yaml"
+    health-check:
+      enable: true
+      url: http://www.gstatic.com/generate_204
+      interval: 30
+proxy-groups:
+- name: Streaming
+  type: load-balance
+  strategy: round-robin
+  disable-udp: false
+  proxies:
+  - DIRECT
+  url: http://www.gstatic.com/generate_204
+  interval: '300'
+  interface-name: eth2
+- name: Games
+  type: load-balance
+  strategy: round-robin
+  disable-udp: false
+  proxies:
+  - DIRECT
+  url: http://www.gstatic.com/generate_204
+  interval: '300'
+  interface-name: eth1
+- name: Ewallet
+  type: load-balance
+  strategy: round-robin
+  disable-udp: false
+  proxies:
+  - DIRECT
+  url: http://www.gstatic.com/generate_204
+  interval: '300'
+  interface-name: eth1
+- name: Sosmed
+  type: load-balance
+  strategy: round-robin
+  disable-udp: false
+  proxies:
+  - DIRECT
+  url: http://www.gstatic.com/generate_204
+  interval: '300'
+  interface-name: eth2
+- name: Auto
+  type: load-balance
+  strategy: round-robin
+  disable-udp: false
+  proxies:
+  - DIRECT
+  url: http://www.gstatic.com/generate_204
+  interval: '300'
+  interface-name: eth1
+rule-providers:
+  Direct:
+    type: file
+    behavior: classical
+    path: "./rule_provider/direct.yaml"
+  Reject:
+    type: file
+    behavior: classical
+    path: "./rule_provider/reject.yaml"
+  Streaming:
+    type: file
+    behavior: classical
+    path: "./rule_provider/streaming.yaml"
+  Games:
+    type: file
+    behavior: classical
+    path: "./rule_provider/games.yaml"
+  Sosmed:
+    type: file
+    behavior: classical
+    path: "./rule_provider/sosmed.yaml"
+  Ewallet:
+    type: file
+    behavior: classical
+    path: "./rule_provider/ewallet.yaml" 
+
+rules:
+  - IP-CIDR,10.0.0.0/8,DIRECT
+  - IP-CIDR,100.64.0.0/10,DIRECT
+  - IP-CIDR,127.0.0.0/8,DIRECT
+  - IP-CIDR,169.254.0.0/8,DIRECT
+  - IP-CIDR,172.16.0.0/12,DIRECT
+  - IP-CIDR,192.168.0.0/16,DIRECT
+  - IP-CIDR,224.0.0.0/3,DIRECT
+  - IP-CIDR6,::1/128,DIRECT
+  - IP-CIDR6,fc00::/7,DIRECT
+  - IP-CIDR6,fe80::/10,DIRECT
+  - IP-CIDR6,fd00::/8,DIRECT
+  - RULE-SET,Sosmed,Sosmed
+  - RULE-SET,Ewallet,Ewallet
+  - RULE-SET,Streaming,Streaming
+  - RULE-SET,Games,Games
+  - RULE-SET,Direct,DIRECT
+  - RULE-SET,Reject,REJECT
+  - MATCH,GLOBAL
